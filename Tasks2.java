@@ -32,6 +32,7 @@ assignment.
 • Uncompilable or unexecutable program may receive zero mark
  */
 import java.util.Scanner;
+import java.util.Random;
 import java.math.BigInteger;
 import java.lang.Math;
 import javax.crypto.Cipher;
@@ -49,11 +50,15 @@ public class Tasks2
        System.out.println("\n");
 
         int newP = generatePrime();
-        int newG = generateElement(newP);
+        int newG = generateG(newP);
+        int n = newP*newG;
+        int m = (newP-1)*(newG-1);
 
-        //generates, alice and bobs keypairs
-        KeyPair AliceKey = generateKeyPair();
-        KeyPair BobKey = generateKeyPair();
+        int e = generateE(m);
+
+//        //generates, alice and bobs keypairs
+//        KeyPair AliceKey = generateKeyPair();
+//        KeyPair BobKey = generateKeyPair();
 
         System.out.println("An asymmetric signature keypair for each party has been generated\n");
         System.out.println("Safe prime and Generator has been created as well\n");
@@ -79,55 +84,50 @@ public class Tasks2
         String yString = Integer.toString(computeExp(newG,y));
 
         //concatenate binery or string?
-        String gygx = yString + xString;
-        System.out.println("Bob concatenates g^y g^x\n");
 
         //signs the concatenated string with his private key
-        String sig1 = sign(gygx, BobKey.getPrivate());
-        System.out.println("signs the concatenated string with his private key");
 
         //encrypts the signature with K
-        System.out.println("encrypts the signature with K");
-        String sig2 = encrypt(sig1,BobKey.getPublic());
 
         //sends cipher text with his g^y to Alice
 
         //Alice then computes K=(g^y)^x
-        int AliceK = computeExp(computeExp(newG,y),x);
-        System.out.println(AliceK + " then "+ BobKey);
 
 
 
 
     }
-    public static String encrypt(String plainText, PublicKey publicKey) throws Exception 
+
+    public static int generateE(int m)
     {
-        Cipher encryptCipher = Cipher.getInstance("RSA");
-        encryptCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        Random rand = new Random();
+        int bigM = m;
+        int e = 0;
+        //while gcd isnt 1
+        while(true)
+        {
+            e = rand.nextInt(m) + 2;
 
-        byte[] cipherText = encryptCipher.doFinal(plainText.getBytes(UTF_8));
+            if(findGCD(e,bigM)==1)
+            {
+                System.out.println("e is: "+e);
+                return e;
+            }
+        }
 
-        return Base64.getEncoder().encodeToString(cipherText);
+
     }
-    public static String sign(String plainText, PrivateKey privateKey) throws Exception 
-    {
-        Signature privateSignature = Signature.getInstance("SHA256withRSA");
-        privateSignature.initSign(privateKey);
-        privateSignature.update(plainText.getBytes(UTF_8));
-
-        byte[] signature = privateSignature.sign();
-
-        return Base64.getEncoder().encodeToString(signature);
+    private static int findGCD(int number1, int number2) 
+    { 
+        //base case 
+        if(number2 == 0)
+        { 
+            return number1; 
+        } 
+        return findGCD(number2, number1%number2); 
     }
 
-    public static KeyPair generateKeyPair() throws Exception 
-    {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-        gen.initialize(1024, new SecureRandom());
-        KeyPair pair = gen.generateKeyPair();
 
-        return pair;
-    }
     public static int computeExp(int g, int num)
     {
         double expNum = Math.pow(g,num);
@@ -150,12 +150,12 @@ public class Tasks2
 //
 //    }
 
-    public static int generateElement(int prime)
+    public static int generateG(int prime)
     {
         int g = prime+1;
         while(true)
         {
-            int bitLength= 512;
+            int bitLength= 1024;
             SecureRandom rnd2=new SecureRandom();
             g=BigInteger.probablePrime(bitLength, rnd2).intValue();
             if (prime > g && g > 0)
