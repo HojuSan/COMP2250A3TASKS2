@@ -49,25 +49,31 @@ public class Tasks2
        Scanner sc = new Scanner(System.in);
        System.out.println("\n");
 
-        int newP = generatePrime();
-        int newG = generateG(newP);
-        int n = newP*newG;
-        int m = (newP-1)*(newG-1);
+//        int newP = generatePrime();
+//        int newG = generateG(newP);
+//        int n = newP*newG;
+//        int m = (newP-1)*(newG-1);
+//
+//        int e = generateE(m);
+//        int d = generateD(e,n);
+        BigInteger newP = generatePrime();
+        BigInteger newG = generateG(newP);
+        BigInteger n = newP.multiply(newG);
+        //for calculation purposes
+        int newP1 = newP.intValue()-1;
+        int newG1 = newG.intValue()-1;
 
-        int e = generateE(m);
+        BigInteger m = BigInteger.valueOf(newP1).multiply(BigInteger.valueOf(newG1));
+//TODO need to work on this section
+        BigInteger e = generateE(m);
+        BigInteger d = generateD(e,n);
 
-//        //generates, alice and bobs keypairs
-//        KeyPair AliceKey = generateKeyPair();
-//        KeyPair BobKey = generateKeyPair();
 
         System.out.println("An asymmetric signature keypair for each party has been generated\n");
         System.out.println("Safe prime and Generator has been created as well\n");
 
-//        System.out.println("prime " + newP+"\n");
-//        System.out.println("generator " + newG+"\n");
-//
-//        System.out.println("Alice public: "+AliceKey.getPublic() +"\n Bob public: "+BobKey.getPublic()+"\n");
-//        System.out.println("Alice private: "+AliceKey.getPrivate() +"\n Bob private: "+BobKey.getPrivate()+"\n");
+        System.out.println("prime " + newP+"\n");
+        System.out.println("generator " + newG+"\n");
 
         System.out.println("Alice generates a random number x: ");
         int x = sc.nextInt();
@@ -76,12 +82,16 @@ public class Tasks2
         System.out.println("Bob generates a random number y: ");
         int y = sc.nextInt();
 
+
         //K=(g^x)^y
         int BobK = computeExp(computeExp(newG,x),y);
         System.out.println("Bob computates the shared key K=(g^x)^y: "+BobK);
 
-        String xString = Integer.toString(computeExp(newG,x));
-        String yString = Integer.toString(computeExp(newG,y));
+//        int biGX = Integer.toBinaryString(computeExp(newG,x));
+//        int biGY = Integer.toBinaryString(computeExp(newG,y));
+
+        System.out.println("xbinary: "+computeExp(newG,x));
+        System.out.println("\nybinary: "+computeExp(newG,y));
 
         //concatenate binery or string?
 
@@ -98,7 +108,13 @@ public class Tasks2
 
     }
 
-    public static int generateE(int m)
+    public static BigInteger generateD(BigInteger e,BigInteger n)
+    {
+        int d;
+        d= (1%n)/e;
+        return d;
+    }
+    public static BigInteger generateE(BigInteger m)
     {
         Random rand = new Random();
         int bigM = m;
@@ -114,10 +130,8 @@ public class Tasks2
                 return e;
             }
         }
-
-
     }
-    private static int findGCD(int number1, int number2) 
+    private static BigInteger findGCD(BigInteger number1, BigInteger number2) 
     { 
         //base case 
         if(number2 == 0)
@@ -134,38 +148,25 @@ public class Tasks2
         int newNum = (int) expNum;
         return newNum;
     }
-    //Bob concatenates the exponentials (gy, gx) (order is important), signs them using his asymmetric (private) key B,
-    // and then encrypts the signature with K. He sends the ciphertext along with his own exponential gy to Alice.
-//    public static String verification(int y, int x)
-//    {
-//        String xString = Integer.toString(x);
-//        String yString = Integer.toString(y);
-//        String conString = "";
-//
-//        //concatenate the g^y and g^x
-//        conString = yString + xString;
-//
-//        sign(conString,????);
-//
-//
-//    }
 
-    public static int generateG(int prime)
+    public static BigInteger generateG(BigInteger prime)
     {
-        int g = prime+1;
+        BigInteger g;
+        int zero = 0;
         while(true)
         {
             int bitLength= 1024;
             SecureRandom rnd2=new SecureRandom();
             g=BigInteger.probablePrime(bitLength, rnd2).intValue();
-            if (prime > g && g > 0)
+
+            if (prime.compareTo(g)==1 && g.intValue()>0)
             {
 				return g;
             }
         }
     }
 
-    public static int generatePrime()
+    public static BigInteger generatePrime()
     {
 		int safeP = 16;
 		/*7 is a known prime that doesn't generate a safe prime when*/
@@ -183,7 +184,8 @@ public class Tasks2
 			/*Checks if it is still a prime after calculations also has to be positive*/
             if (isPrime(safeP) && safeP>0)
             {
-				return safeP;
+                BigInteger num = BigInteger.valueOf(safeP);
+				return num;
             }
         }
         //false news
