@@ -33,10 +33,8 @@ assignment.
  */
 import java.util.Scanner;
 import java.util.Random;
-import java.math.BigInteger;
-import java.lang.Math;
+import java.math.*;
 import javax.crypto.Cipher;
-import java.security.KeyPair;
 import java.io.InputStream;
 import java.security.*;
 import java.util.Base64;
@@ -86,12 +84,23 @@ public class Tasks2
 
         System.out.println("\nAlice generates a random number x: ");
         int x = sc.nextInt();
-        System.out.println("\nthen send g^x to Bob\n");
+
+        BigInteger gx = newG.pow(x);
+        System.out.println("\nthen send g^x to Bob "+ gx);
 
         System.out.println("\nBob generates a random number y: ");
         int y = sc.nextInt();
 
-        System.out.println("\nBob generates a random number g^y: "  );
+        BigInteger gy = newG.pow(y);
+        System.out.println("\nBob generates g^y: "  +gy);
+
+        BigInteger bobK = gx.pow(y);
+        System.out.println("\nBob generates (g^x)^y: "  +bobK);
+
+        String s1 = gx.toString();
+        String s2 = gy.toString();
+        String s3 = s2 + s1;
+        System.out.println("\nBob concatenates g^y and g^x " + s3);
 
 
     }
